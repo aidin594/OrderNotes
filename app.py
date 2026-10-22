@@ -1126,12 +1126,31 @@ class OrderNotesApp:
         self.list_page_label.configure(text=f'{self.list_page+1} / {pages}  ·  {len(requests)}')
         self.previous_list.configure(state='normal' if self.list_page>0 else 'disabled')
         self.next_list.configure(state='normal' if self.list_page<max_page else 'disabled')
+        # Reuse existing row widgets when the visible records are unchanged.
+        # Destroying the clicked widget on every selection can swallow rapid
+        # follow-up clicks and make the previous row appear stuck.
+        visible=requests[self.list_page*page_size:(self.list_page+1)*page_size]
+        signature=tuple((r['id'],r['revision'],r['stage'],r['phone'],
+                         r['customer_name'],r['items'],r['created_at']) for r in visible)
+        previous=getattr(self,'_list_render_signature',None)
+        if previous==signature and getattr(self,'_list_render_widgets',None):
+            for rid,widgets in self._list_render_widgets.items():
+                chosen=rid==self.selected_id
+                bg=COLORS['blue_light'] if chosen else COLORS['white']
+                for w in widgets:
+                    w.configure(bg=bg)
+                frame=widgets[0]
+                frame.configure(highlightbackground=COLORS['blue'] if chosen else COLORS['line'],
+                                highlightthickness=1 if chosen else 0)
+            return
+        self._list_render_signature=signature
+        self._list_render_widgets={}
         for child in self.list_inner.winfo_children():
             child.destroy()
         if not requests:
             label(self.list_inner,'No matching requests',size=9,fg=COLORS['muted']).pack(pady=24)
             return
-        for req in requests[self.list_page*page_size:(self.list_page+1)*page_size]:
+        for req in visible:
             chosen=req['id']==self.selected_id
             bg=COLORS['blue_light'] if chosen else COLORS['white']
             frame=tk.Frame(self.list_inner,bg=bg,padx=7,pady=3,cursor='hand2',
@@ -1160,9 +1179,10 @@ class OrderNotesApp:
             badge_bg,badge_fg=BADGES[req['stage']]
             badge=label(bottom,STAGE_LABELS[req['stage']],size=8,bold=True,fg=badge_fg,bg=badge_bg,padx=3)
             badge.pack(side='right')
-            for w in (frame,item_label,bottom,badge,subtitle):
+            self._list_render_widgets[req['id']]=(frame,item_label,phone,bottom,subtitle)
+            for w in (frame,item_label,phone,bottom,badge,subtitle):
                 w.bind('<Button-1>',lambda e,rid=req['id']:self.show_request(rid))
-            phone.bind('<Button-1>',lambda e,number=req['phone']:self.copy_value(number))
+            # Right-click still opens the record context menu.
             for w in (frame,item_label,phone,bottom,badge,subtitle):
                 w.bind('<Button-3>',lambda e,rid=req['id']:self.show_request_menu(e,rid))
 
