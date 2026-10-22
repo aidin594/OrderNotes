@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/windows-release.yml'
+      - 'tests/test_storage.py'
   workflow_dispatch:
 
 permissions:
