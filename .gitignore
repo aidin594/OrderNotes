@@ -1,0 +1,32 @@
+# Python and test artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+*.spec
+
+# Builds and generated executables
+build/
+dist/
+OrderNotes_Portable/
+*.exe
+*.zip
+
+# Personal records, credentials, and backups
+**/data/
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite-*
+*.log
+*.bak
+*.backup
+backups/
+draft.json
+ui_layout.json
+.env
+.env.*
+secrets/
+*credentials*.json
