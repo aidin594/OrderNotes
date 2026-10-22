@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: ordernotes-v1.8.2-windows-release
+  group: ordernotes-v1.8.2-windows-release-headless
   cancel-in-progress: true
 
 jobs:
