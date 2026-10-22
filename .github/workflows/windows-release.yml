@@ -13,7 +13,7 @@ permissions:
 
 concurrency:
   group: ordernotes-v1.8.2-windows-release
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build-and-release:
@@ -31,8 +31,9 @@ jobs:
       - name: Run all unit tests
         run: python -m unittest discover -s tests -v
 
-      - name: Run GUI smoke test
-        run: python tests/gui_smoke.py
+      - name: Check GUI smoke test syntax
+        run: python -m py_compile tests/gui_smoke.py
+        # Interactive Tk tests run locally; hosted Windows Actions has no usable desktop.
 
       - name: Install PyInstaller
         run: python -m pip install --disable-pip-version-check "pyinstaller>=6.10,<7"
