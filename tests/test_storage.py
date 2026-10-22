@@ -70,8 +70,10 @@ class PortableStorageTests(unittest.TestCase):
     def test_frozen_exe_folder_is_not_internal_resource_folder(self):
         exe = self.root / 'OrderNotes_Portable' / 'OrderNotes.exe'
         with patch.object(sys, 'frozen', True, create=True), patch.object(sys, 'executable', str(exe)):
-            self.assertEqual(program_folder(), exe.parent)
-            self.assertEqual(portable_data_folder(), exe.parent / 'data')
+            # Windows runners may return a short (8.3) executable path while
+            # Path.resolve() expands it to its canonical long-path spelling.
+            self.assertEqual(program_folder(), exe.parent.resolve())
+            self.assertEqual(portable_data_folder(), exe.parent.resolve() / 'data')
 
     def test_unwritable_folder_refuses_without_fallback(self):
         with patch('storage.tempfile.NamedTemporaryFile', side_effect=PermissionError('read only')):
